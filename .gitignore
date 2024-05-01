@@ -1,0 +1,6 @@
+/target
+/database_tmp
+.env
+cargo.lock
+poetry.lock
+/backend
