@@ -4,14 +4,28 @@ import psycopg2
 from dotenv import load_dotenv
 
 
-def get_variable_types(connection):
+def get_variable_types(connection, table_name="users"):
+    """Get column names and their types for the given table.
+
+    Implementative details:
+    - This query handles custom types and return their names."""
     cursor = connection.cursor()
     cursor.execute(
-        """
-        SELECT column_name, data_type
-        FROM information_schema.columns
-        WHERE table_schema = 'public'
-    """
+        f"""SELECT 
+        a.attname AS column_name,
+        format_type(a.atttypid, a.atttypmod) AS data_type
+    FROM 
+        pg_attribute a
+    JOIN 
+        pg_class c ON a.attrelid = c.oid
+    JOIN 
+        pg_namespace n ON n.oid = c.relnamespace
+    WHERE 
+        c.relname = '{table_name}'
+        AND n.nspname = 'public' -- or any other schema name
+        AND a.attnum > 0
+    ORDER BY 
+        a.attnum;"""
     )
     variable_types = cursor.fetchall()
     cursor.close()
