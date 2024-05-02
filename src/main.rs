@@ -1,7 +1,7 @@
+use diesel::connection;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager, Pool, PooledConnection};
 use sql_custom_types::models::User;
-use sql_custom_types::non_empty_string::NonEmptyText;
 pub type DBPool = Pool<ConnectionManager<PgConnection>>;
 
 fn main() {
@@ -24,4 +24,19 @@ fn main() {
             std::process::exit(1);
         }
     };
+
+    let user = User {
+        id: 1,
+        first_name: "".into(),
+        middle_name: Some("Doe".into()),
+        last_name: "Doe".into(),
+    };
+
+    let mut connection = pool.get().expect("Failed to get connection from pool");
+    user.insert(&mut connection).expect("Failed to insert user");
+
+    println!(
+        "{:?}",
+        User::get(1, &mut connection).expect("Failed to get user")
+    );
 }

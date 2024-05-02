@@ -1,14 +1,9 @@
 // @generated automatically by Diesel CLI.
 
 pub mod sql_types {
-    use diesel::sql_types::Text;
-    use diesel::{AsExpression, FromSqlRow};
-    #[derive(
-        Debug, FromSqlRow, AsExpression, diesel::query_builder::QueryId, diesel::sql_types::SqlType,
-    )]
-    #[diesel(sql_type = Text)]
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "non_empty_text"))]
-    pub struct NonEmptyText(pub String);
+    pub struct NonEmptyText;
 }
 
 diesel::table! {

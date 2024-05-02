@@ -32,6 +32,17 @@ def get_variable_types(connection, table_name="users"):
     return variable_types
 
 
+def get_oid_of_Text(connection):
+    cursor = connection.cursor()
+    cursor.execute(
+        f"""SELECT * FROM pg_attribute
+        WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = 'mytable');"""
+    )
+    variable_types = cursor.fetchall()
+    cursor.close()
+    return variable_types
+
+
 def main():
     load_dotenv()
     try:
@@ -67,3 +78,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    get_oid_of_Text()

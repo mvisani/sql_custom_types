@@ -2,26 +2,30 @@
 
 #![allow(unused)]
 #![allow(clippy::all)]
-
-use crate::schema::sql_types::NonEmptyText;
 use crate::schema::users;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
-use diesel::sql_types::Text;
-use diesel::{AsExpression, FromSqlRow};
 
-#[derive(Queryable, Debug, Insertable)]
+#[derive(
+    Queryable,
+    Debug,
+    Eq,
+    PartialEq,
+    Clone,
+    Default,
+    Identifiable,
+    QueryableByName,
+    Insertable,
+    Selectable,
+    AsChangeset,
+)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: i32,
-    pub first_name: NonEmptyText,
-    pub middle_name: Option<NonEmptyText>,
-    pub last_name: NonEmptyText,
+    pub first_name: crate::custom_types::NonEmptyTextRust,
+    pub middle_name: Option<crate::custom_types::NonEmptyTextRust>,
+    pub last_name: crate::custom_types::NonEmptyTextRust,
 }
-
-// #[derive(Debug, FromSqlRow, AsExpression)]
-// #[diesel(sql_type = crate::schema::sql_types::NonEmptyText)]
-// pub struct NonEmptyString(pub String);
 
 impl User {
     pub fn insert(
@@ -31,5 +35,12 @@ impl User {
         diesel::insert_into(users::table)
             .values(self)
             .get_result(connection)
+    }
+
+    pub fn get(
+        id: i32,
+        connection: &mut PooledConnection<ConnectionManager<diesel::prelude::PgConnection>>,
+    ) -> Result<Self, diesel::result::Error> {
+        users::table.find(id).first(connection)
     }
 }
