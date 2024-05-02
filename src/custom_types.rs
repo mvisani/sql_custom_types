@@ -1,6 +1,5 @@
 use diesel::pg::Pg;
-use diesel::serialize::Output;
-use diesel::serialize::WriteTuple;
+use diesel::serialize::{Output, ToSql, WriteTuple};
 use diesel::sql_types::Text;
 use diesel::{
     backend::Backend,
@@ -12,7 +11,7 @@ use diesel::{
 #[diesel(sql_type = crate::schema::sql_types::NonEmptyText)]
 pub struct NonEmptyTextRust(String);
 
-impl diesel::serialize::ToSql<crate::schema::sql_types::NonEmptyText, Pg> for NonEmptyTextRust {
+impl ToSql<crate::schema::sql_types::NonEmptyText, Pg> for NonEmptyTextRust {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> diesel::serialize::Result {
         WriteTuple::<(Text,)>::write_tuple(&(self.0.clone(),), &mut out.reborrow())
     }
@@ -30,6 +29,8 @@ impl FromSql<crate::schema::sql_types::NonEmptyText, diesel::pg::Pg> for NonEmpt
     }
 }
 
+/// Implement the `From<&str>` trait for `NonEmptyTextRust`
+/// This allows to convert a `&str` to `NonEmptyTextRust`
 impl From<&str> for NonEmptyTextRust {
     fn from(s: &str) -> Self {
         NonEmptyTextRust(s.into())
